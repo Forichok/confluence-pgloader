@@ -405,11 +405,9 @@ DECLARE
 BEGIN
   FOR r in
        SELECT 'select '
-               || trim(trailing ')'
-                  from replace(pg_get_expr(d.adbin, d.adrelid),
-                               'nextval', 'setval'))
-               || ', (select greatest(max(' || quote_ident(a.attname) || '), (select seqmin from pg_sequence where seqrelid = ('''
-               || pg_get_serial_sequence(quote_ident(nspname) || '.' || quote_ident(relname), quote_ident(a.attname)) || ''')::regclass limit 1), 1) from only '
+               || trim(trailing ')' from replace(pg_get_expr(d.adbin, d.adrelid), 'nextval', 'setval'))
+               || ', (select greatest(max(' || quote_ident(a.attname) || '), (select seqmin from pg_sequence where seqrelid = '
+               || quote_literal(pg_get_serial_sequence(quote_ident(nspname) || '.' || quote_ident(relname), a.attname)) || '::regclass limit 1), 1) from only '
                || quote_ident(nspname) || '.' || quote_ident(relname) || '));' as sql
          FROM pg_class c
               JOIN pg_namespace n on n.oid = c.relnamespace
